@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,16 @@
     <meta name="color-scheme" content="dark light">
     <link rel="stylesheet" href="index.css">
 </head>
+
 <body style="font-family: sans-serif; width: min(60ch, 100%); margin: auto; min-height: 80vh;">
     <h1>Remember</h1>
+    <button fx-action="/api/hello" fx-method="get" fx-trigger="click" fx-target="#output" fx-swap="innerHTML">
+        Get Content
+    </button>
+    <output id="output"></output>
     <script src="index.js" type="text/javascript" defer></script>
+
+    <script src="fixi-0.9.2.js" type="text/javascript" defer></script>
 </body>
+
 </html>
