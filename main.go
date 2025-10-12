@@ -1,25 +1,31 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 )
 
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	w.Write([]byte("<p>Hello, world!</p>"))
-}
-
 func main() {
 
-	http.Handle("/", http.FileServer(http.Dir("public"))) // kinda only if dev mode but for now, whatever
+	tmpl := template.Must(template.ParseFiles(
+		"frame.html",
+		"content.html",
+	))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		data := map[string]interface{}{
+			"Title":   "Hello world",
+			"Heading": "Welcome",
+			"Body":    "This content comes from layout.html",
+		}
 
-	http.HandleFunc("/api/hello", helloHandler);
+		if err := tmpl.ExecuteTemplate(w, "frame", data); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
 
 	log.Println("Serving on http://localhost:8080")
+
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal(err)

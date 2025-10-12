@@ -1,17 +1,17 @@
+{{ define "frame" }}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{{ .Title }}</title>
     <meta name="color-scheme" content="dark light">
-    <link rel="stylesheet" href="index.css">
 </head>
 
 <body style="font-family: sans-serif; width: min(60ch, 100%); margin: auto; min-height: 80vh;">
-    <h1>Remember</h1>
-
+	  {{ template "content" . }}
 </body>
 
 </html>
+{{ end }}
