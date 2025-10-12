@@ -15,9 +15,9 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	http.Handle("/", http.FileServer(http.Dir("public")))
+	http.Handle("/", http.FileServer(http.Dir("public"))) // kinda only if dev mode but for now, whatever
 
-	http.HandleFunc("/api/hello", helloHandler)
+	http.HandleFunc("/api/hello", helloHandler);
 
 	log.Println("Serving on http://localhost:8080")
 	err := http.ListenAndServe(":8080", nil)
