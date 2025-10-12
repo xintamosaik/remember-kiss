@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+const PORT = ":8080"
+
 func main() {
 
 	tmpl := template.Must(template.ParseFiles(
@@ -24,9 +26,9 @@ func main() {
 		}
 	})
 
-	log.Println("Serving on http://localhost:8080")
+	log.Println("Serving on http://localhost" + PORT)
 
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(PORT, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
