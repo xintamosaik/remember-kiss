@@ -82,6 +82,36 @@
             return JSON.parse(data)
         }
 
+        function handleKeyboard(event) {
+            const number = parseInt(event.key)
+            if (Number.isNaN(number)){
+                  return
+            }
+
+            if (number === 0) {
+                return // future: new item
+            }
+   
+            if (!window.todo_list) {
+                console.log("There is no todo list")
+                return;
+            }
+            const items = window.todo_list.querySelectorAll('li')
+            if (items.length === 0) {
+                console.log("No items")
+            }
+     
+            const item = items[number-1]
+     
+            if (item === undefined) {
+                console.log(`There is no item with the number you typed (${number}).`)
+                return
+            }
+       
+            item.click()
+        }
+
+
     </script>
 </head>
 
@@ -196,6 +226,8 @@
             this.hidePopover();
         }
         window.edit_todo.addEventListener("submit", update_todo);
+
+        document.addEventListener("keydown", handleKeyboard);
     </script>
 
 
