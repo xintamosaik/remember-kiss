@@ -63,14 +63,16 @@
 
     </style>
     <script>
+        const new_timestamp = () =>  new Date().getTime();
 
         function update_item(item, key) {
+            item.update = new_timestamp();
             const json = JSON.stringify(item)
             localStorage.setItem(key, json);
         }
 
         function save_item(item) {
-            const linux_timestamp = new Date().getTime();
+            const linux_timestamp = new_timestamp()
             const json = JSON.stringify(item)
             localStorage.setItem(linux_timestamp, json);
         }
