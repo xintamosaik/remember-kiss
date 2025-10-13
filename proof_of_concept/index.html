@@ -52,7 +52,7 @@
             padding-inline-start: 2ch;
         }
 
-        
+
         #todo_list li {
             cursor: pointer;
         }
@@ -60,10 +60,9 @@
         #todo_list li:hover {
             color: var(--color-primary);
         }
-
     </style>
     <script>
-        const new_timestamp = () =>  new Date().getTime();
+        const new_timestamp = () => new Date().getTime();
 
         function update_item(item, key) {
             item.update = new_timestamp();
@@ -181,15 +180,15 @@
             event.preventDefault();
             const data = new FormData(this)
             const short = data.get("short")
-            const key = data.get("key")            
-    
-            update_item( {short}, key )
+            const key = data.get("key")
+
+            update_item({ short }, key)
             this.reset();
             this.hidePopover();
         }
         window.edit_todo.addEventListener("submit", update_todo);
     </script>
-    
+
 
 
 </body>
