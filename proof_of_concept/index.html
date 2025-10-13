@@ -110,7 +110,7 @@
         <h2>Add Item</h2>
         <br>
         <label for="short">
-            Short Description
+            Short Headline
         </label>
         <br>
         <input name="short" type="text" id="short" required>
@@ -140,10 +140,16 @@
         <input name="key" type="hidden" id="key">
         <br>
         <label for="short">
-            Short Description
+            Short Headline
         </label>
         <br>
         <input name="short" type="text" id="short" required>
+        <br>
+        <label for="long">
+            Long Description
+        </label>
+        <br>
+        <input name="long" type="text" id="long">
         <br>
         <button class="primary" type="submit">
             Update Item
@@ -171,6 +177,8 @@
                 return
             }
             form.short.value = item.short
+            form.long.value = item.long ?? ""
+
             form.key.value = key
             form.showPopover();
         }
@@ -180,9 +188,10 @@
             event.preventDefault();
             const data = new FormData(this)
             const short = data.get("short")
+            const long = data.get("long")
             const key = data.get("key")
 
-            update_item({ short }, key)
+            update_item({ short, long }, key)
             this.reset();
             this.hidePopover();
         }
