@@ -51,3 +51,4 @@ export class TodoList extends HTMLElement {
   }
 }
 
+customElements.define("todo-list", TodoList);

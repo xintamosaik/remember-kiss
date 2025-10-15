@@ -1,6 +1,6 @@
 // todo-form.js
 import todo  from "./todo.mjs";   // your localStorage API
-
+import "./button-primary.mjs";
 export class TodoForm extends HTMLElement {
   connectedCallback() {
     this.attachShadow({ mode: "open" });
@@ -9,33 +9,13 @@ export class TodoForm extends HTMLElement {
 
   render() {
     this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          border-top: 1px solid var(--color-primary, hotpink);
-          padding: 1ch 0;
-        }
-        form {
-          display: flex;
-          flex-direction: column;
-          gap: .5ch;
-        }
-        button {
-          cursor: pointer;
-          border: none;
-          border-radius: 1ch;
-          padding: .5ch 1ch;
-        }
-        button.primary { background: var(--color-primary, hotpink); color: white; }
-        button.secondary { background: transparent; }
-      </style>
       <form popover>
         <label>
           Short Headline
           <input name="short" type="text" required>
         </label>
         <div>
-          <button class="primary" type="submit">Add Item</button>
+          <button-primary>Add Item</button-primary>
           <button class="secondary" type="button" id="cancel">Cancel</button>
         </div>
       </form>
@@ -69,3 +49,4 @@ export class TodoForm extends HTMLElement {
     this.shadowRoot.querySelector("form").reset();
   }
 }
+customElements.define("todo-form", TodoForm);
