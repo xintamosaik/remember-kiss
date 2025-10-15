@@ -1,5 +1,5 @@
 {{ define "content" }}
-<form id="edit_todo" action="">
+<form id="edit_todo" action="/update" method="POST">
     <h2>Edit Item</h2>
     <input name="key" type="hidden" id="key">
     <br>
@@ -23,7 +23,7 @@
     </button>
 </form>
 <script>
-    (function open_todo() {
+    (async function open_todo() {
         const params = new URLSearchParams(window.location.search);
         const key = params.get("key");
         if (!key) {
@@ -31,36 +31,29 @@
             return;
         }
 
-        const item = load_item(key)
-        if (!item) {
+        const json = await fetch(`/todo/${key}`)
+        if (!json) {
             console.log("We could not find an item")
             return;
         }
+
+        item = await json.json()
+        console.log(item)
+        
 
         const form = window.edit_todo;
         if (!form) {
             console.log("There is no form to edit. Did the ID change?");
             return
         }
-        form.short.value = item.short
-        form.long.value = item.long ?? ""
+        form.short.value = item.Short
+        form.long.value = item.Long ?? ""
 
         form.key.value = key
     })();
 
-    function update_todo(event) {
-        event.preventDefault();
-        const data = new FormData(this)
-        const short = data.get("short")
-        const long = data.get("long")
-        const key = data.get("key")
 
-        update_item({ short, long }, key)
 
-        window.history.back();
-
-    }
-    window.edit_todo.addEventListener("submit", update_todo);
 </script>
 
 {{ end }}

@@ -11,15 +11,15 @@ import (
 )
 
 type TodoItem struct {
-	ID        string
-	Short     string
-	Long      string
-	CreatedAt string
-	UpdatedAt string
+	ID        string `json:"ID"`
+	Short     string `json:"Short"`
+	Long      string `json:"Long"`
+	CreatedAt string `json:"CreatedAt"`
+	UpdatedAt string `json:"UpdatedAt"`
 }
 
 type TodoList struct {
-	Items []TodoItem
+	Items []TodoItem `json:"Items"`
 }
 
 const PORT = ":3000"
@@ -98,10 +98,29 @@ func regenerateHTML() {
 	}
 }
 func main() {
-
-	http.Handle("/", http.FileServer(http.Dir("public")))
+	// Load existing TODOs from JSON file
 	regenerateHTML() // will be in a different process later but for development it's ok here
 	regenerateIndex()
+
+	http.Handle("/", http.FileServer(http.Dir("public")))
+
+
+	// API:GET:/todo/{id} - for fetching a single item with fetch API
+	http.HandleFunc("/todo/", func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Path[len("/todo/"):]
+		log.Printf("Fetching item with ID: %s\n", id)
+		item, exists := globalTODOsInMemory[id]
+		if !exists {
+			http.Error(w, "Item not found", http.StatusNotFound)
+			return
+		}
+
+		log.Printf("Found item: %+v\n", item)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(item)	
+	})
+
 	// API:POST:/add
 	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -129,6 +148,41 @@ func main() {
 		}
 
 		globalTODOsInMemory[timestamp] = item
+		saveToJSON()
+		regenerateIndex()
+		log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
+
+		// Handle form submission logic here
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
+	// API:POST:/update
+	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Failed to parse form", http.StatusBadRequest)
+			return
+		}
+
+		key := r.FormValue("key")
+		short := r.FormValue("short")
+		long := r.FormValue("long")
+		log.Printf("Updating item %s: %s / %s\n", key, short, long)
+
+		item, exists := globalTODOsInMemory[key]
+		if !exists {
+			http.Error(w, "Item not found", http.StatusNotFound)
+			return
+		}
+
+		item.Short = short
+		item.Long = long
+		item.UpdatedAt = time.Now().Format(time.RFC3339)
+		globalTODOsInMemory[key] = item
 		saveToJSON()
 		regenerateIndex()
 		log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
