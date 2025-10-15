@@ -8,84 +8,9 @@
 
     <title>TODO</title>
 
-    <style>
-        :root {
-            --color-primary: hotpink;
-        }
+    <link rel="stylesheet" href="index.css">
+    <script type="module"  src="./index.js"></script>
 
-        body {
-            font-family: sans-serif;
-            line-height: 1.5;
-        }
-
-        header,
-        main,
-        form {
-            box-sizing: border-box;
-            width: min(60ch, 100%);
-            margin: auto;
-            border-left: 1px solid var(--color-primary);
-            border-right: 1px solid var(--color-primary);
-            padding: 1ch 2ch;
-        }
-
-        button {
-            cursor: pointer;
-            border: none;
-            border-radius: 1ch;
-        }
-
-        button.primary {
-            background-color: var(--color-primary);
-        }
-
-        button.secondary {
-            background-color: transparent;
-        }
-
-        :popover-open {
-            padding-top: 2rem;
-            padding-bottom: 2rem;
-        }
-
-        ol {
-            padding-inline-start: 2ch;
-        }
-
-
-        #todo_list li {
-            cursor: pointer;
-        }
-
-        #todo_list li:hover {
-            color: var(--color-primary);
-        }
-    </style>
-    <script>
-        const new_timestamp = () => new Date().getTime();
-
-        function update_item(item, key) {
-            item.update = new_timestamp();
-            const json = JSON.stringify(item)
-            localStorage.setItem(key, json);
-        }
-
-        function save_item(item) {
-            const linux_timestamp = new_timestamp()
-            const json = JSON.stringify(item)
-            localStorage.setItem(linux_timestamp, json);
-        }
-
-        function load_item(key) {
-            const data = localStorage.getItem(key);
-            if (!data) return
-            return JSON.parse(data)
-        }
-
-
-
-
-    </script>
 </head>
 
 <body>
@@ -96,114 +21,10 @@
         </button>
     </header>
     <main>
-        <ol id="todo_list">
-            <script>
-                (function load_todo() {
-                    Object.keys(localStorage).forEach(key => {
-                        const list_item = document.createElement("li");
-                        list_item.textContent = load_item(key).short
-                        list_item.id = key;
-                        window.todo_list.appendChild(list_item);
-                    })
-                })();
-            </script>
-        </ol>
+        <todo-list> </todo-list>
     </main>
-    <form id="new_todo" action="" popover>
-        <h2>Add Item</h2>
-        <br>
-        <label for="short">
-            Short Headline
-        </label>
-        <br>
-        <input name="short" type="text" id="short" required>
-        <br>
-        <button class="primary" type="submit">
-            Add Item
-        </button>
-        <button class="secondary" type="button" popovertarget="new_todo" popovertargetaction="close">
-            Cancel
-        </button>
-    </form>
-    <script>
-        function save_todo(event) {
-            event.preventDefault();
-            const data = new FormData(this);
-            const short = data.get("short");
-            save_item({ short })
-            this.reset();
-            this.hidePopover();
-        }
-
-        window.new_todo.addEventListener("submit", save_todo);
-    </script>
-
-    <form id="edit_todo" action="" popover>
-        <h2>Edit Item</h2>
-        <input name="key" type="hidden" id="key">
-        <br>
-        <label for="short">
-            Short Headline
-        </label>
-        <br>
-        <input name="short" type="text" id="short" required>
-        <br>
-        <label for="long">
-            Long Description
-        </label>
-        <br>
-        <input name="long" type="text" id="long">
-        <br>
-        <button class="primary" type="submit">
-            Update Item
-        </button>
-        <button class="secondary" type="button" popovertarget="edit_todo" popovertargetaction="close">
-            Cancel
-        </button>
-    </form>
-    <script>
-        function open_todo(event) {
-            if (this === event.target) {
-                console.log("You clicked on the list container.")
-                return;
-            }
-            const key = event.target.id
-            const item = load_item(key)
-            if (!item) {
-                console.log("We could not find an item")
-                return;
-            }
-
-            const form = window.edit_todo;
-            if (!form) {
-                console.log("There is no form to edit. Did the ID change?");
-                return
-            }
-            form.short.value = item.short
-            form.long.value = item.long ?? ""
-
-            form.key.value = key
-            form.showPopover();
-        }
-        window.todo_list.addEventListener("click", open_todo);
-
-        function update_todo(event) {
-            event.preventDefault();
-            const data = new FormData(this)
-            const short = data.get("short")
-            const long = data.get("long")
-            const key = data.get("key")
-
-            update_item({ short, long }, key)
-            this.reset();
-            this.hidePopover();
-        }
-        window.edit_todo.addEventListener("submit", update_todo);
-
-    </script>
-
-
-
+    <todo-form></todo-form>
+    <todo-edit></todo-edit>
 </body>
 
 </html>
