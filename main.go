@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"encoding/json"
 )
 
 type TodoItem struct {
@@ -24,14 +25,27 @@ type TodoList struct {
 const PORT = ":3000"
 
 var globalTODOsInMemory = make(map[string]TodoItem)
+func saveToJSON() error {
+    f, err := os.Create("data.json")
+    if err != nil { return err }
+    defer f.Close()
+
+    enc := json.NewEncoder(f)
+    enc.SetIndent("", "  ")
+    return enc.Encode(globalTODOsInMemory)
+}
+
+func loadFromJSON() {
+    data, err := os.ReadFile("data.json")
+    if err != nil { return } // file might not exist yet
+    json.Unmarshal(data, &globalTODOsInMemory)
+}
 
 func regenerateIndex() {
 	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
 
-	// Seed example items
-	globalTODOsInMemory["1"] = TodoItem{ID: "1", Short: "First item", Long: "This is the first item", CreatedAt: time.Now().Format(time.RFC3339), UpdatedAt: time.Now().Format(time.RFC3339)}
-	globalTODOsInMemory["2"] = TodoItem{ID: "2", Short: "Second item", Long: "This is the second item", CreatedAt: time.Now().Format(time.RFC3339), UpdatedAt: time.Now().Format(time.RFC3339)}
-
+	loadFromJSON()
+	// Convert map to slice for template rendering
 	items := make([]TodoItem, 0, len(globalTODOsInMemory))
 	for _, item := range globalTODOsInMemory {
 		items = append(items, item)
@@ -115,6 +129,8 @@ func main() {
 		}
 
 		globalTODOsInMemory[timestamp] = item
+		saveToJSON()
+		regenerateIndex()
 		log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
 
 		// Handle form submission logic here
