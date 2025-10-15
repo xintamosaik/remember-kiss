@@ -39,7 +39,7 @@ export class TodoList extends HTMLElement {
     });
 
     // bubble up todo-open events from children
-    ol.addEventListener("todo-open", e => {
+    ol.addEventListener("click", e => {
       this.dispatchEvent(
         new CustomEvent("todo-open", {
           detail: e.detail,
