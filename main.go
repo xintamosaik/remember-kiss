@@ -1,46 +1,83 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
-const PORT = ":8080"
+type TodoItem struct {
+	ID        string
+	Short     string
+	Long      string
+	CreatedAt string
+	UpdatedAt string
+}
 
-// This generates 3 static html files index.html, add.html and edit.html in the folder public
-func regenerateHTML() {
-	tmpl := template.Must(template.ParseFiles("frame.html"))
+type TodoList struct {
+	Items []TodoItem
+}
 
-	pages := []struct {
-		filename    string
-		title       string
-		contentFile string
+const PORT = ":3000"
+
+var globalTODOsInMemory = make(map[string]TodoItem)
+
+func regenerateIndex() {
+	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
+
+	// Seed example items
+	globalTODOsInMemory["1"] = TodoItem{ID: "1", Short: "First item", Long: "This is the first item", CreatedAt: time.Now().Format(time.RFC3339), UpdatedAt: time.Now().Format(time.RFC3339)}
+	globalTODOsInMemory["2"] = TodoItem{ID: "2", Short: "Second item", Long: "This is the second item", CreatedAt: time.Now().Format(time.RFC3339), UpdatedAt: time.Now().Format(time.RFC3339)}
+
+	items := make([]TodoItem, 0, len(globalTODOsInMemory))
+	for _, item := range globalTODOsInMemory {
+		items = append(items, item)
+	}
+
+	data := struct {
+		Title string
+		Items []TodoItem
 	}{
-		{"public/index.html", "TODO", "main.html"},
-		{"public/add.html", "Add Item", "add.html"},
-		{"public/edit.html", "Edit Item", "edit.html"},
+		Title: "TODO",
+		Items: items,
+	}
+
+	f, err := os.Create("public/index.html")
+	if err != nil {
+		log.Fatalf("Failed to create index.html: %v", err)
+	}
+	defer f.Close()
+
+	err = tmpl.ExecuteTemplate(f, "frame", data)
+	if err != nil {
+		log.Fatalf("Failed to execute template: %v", err)
+	}
+}
+
+func regenerateHTML() {
+	pages := []struct {
+		filename string
+		title    string
+		files    []string
+	}{
+		{"public/add.html", "Add Item", []string{"frame.html", "add.html"}},
+		{"public/edit.html", "Edit Item", []string{"frame.html", "edit.html"}},
 	}
 
 	for _, page := range pages {
-		contentBytes, err := os.ReadFile(page.contentFile)
-		if err != nil {
-			log.Fatalf("Failed to read %s: %v", page.contentFile, err)
-		}
-		content := struct {
-			Title   string
-			Content template.HTML
-		}{
-			Title:   page.title,
-			Content: template.HTML(string(contentBytes)),
-		}
-		fs, err := os.Create(page.filename)
+		tmpl := template.Must(template.ParseFiles(page.files...))
+		data := struct{ Title string }{Title: page.title}
+
+		f, err := os.Create(page.filename)
 		if err != nil {
 			log.Fatalf("Failed to create %s: %v", page.filename, err)
 		}
-		err = tmpl.ExecuteTemplate(fs, "frame", content)
-		fs.Close()
+		defer f.Close()
+
+		err = tmpl.ExecuteTemplate(f, "frame", data)
 		if err != nil {
 			log.Fatalf("Failed to render %s: %v", page.filename, err)
 		}
@@ -50,7 +87,39 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 	regenerateHTML() // will be in a different process later but for development it's ok here
+	regenerateIndex()
+	// API:POST:/add
+	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
 
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "Failed to parse form", http.StatusBadRequest)
+			return
+		}
+
+		short := r.FormValue("short")
+		log.Println(short)
+
+		// create a linux timestamp for the key
+		timestamp := fmt.Sprintf("%d", time.Now().Unix())
+		item := TodoItem{
+			ID:        timestamp,
+			Short:     short,
+			Long:      "",
+			CreatedAt: time.Now().Format(time.RFC3339),
+			UpdatedAt: time.Now().Format(time.RFC3339),
+		}
+
+		globalTODOsInMemory[timestamp] = item
+		log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
+
+		// Handle form submission logic here
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	})
 	log.Println("Serving on http://localhost" + PORT)
 
 	err := http.ListenAndServe(PORT, nil)

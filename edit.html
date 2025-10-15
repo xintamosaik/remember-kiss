@@ -1,3 +1,4 @@
+{{ define "content" }}
 <form id="edit_todo" action="">
     <h2>Edit Item</h2>
     <input name="key" type="hidden" id="key">
@@ -61,3 +62,5 @@
     }
     window.edit_todo.addEventListener("submit", update_todo);
 </script>
+
+{{ end }}
