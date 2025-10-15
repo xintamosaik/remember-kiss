@@ -49,7 +49,7 @@ func regenerateHTML() {
 func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
-	regenerateHTML()
+	regenerateHTML() // will be in a different process later but for development it's ok here
 
 	log.Println("Serving on http://localhost" + PORT)
 
