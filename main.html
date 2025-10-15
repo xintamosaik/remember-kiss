@@ -1,0 +1,24 @@
+<header>
+    <h1>TODO</h1>
+    <button class="primary">
+        <a href="add.html">Add Item</a>
+    </button>
+</header>
+<main>
+    <ol id="todo_list">
+        <script>
+            (function load_todo() {
+                Object.keys(localStorage).forEach(key => {
+                    const list_item = document.createElement("li");
+
+                    const anchor = document.createElement("a");
+                    anchor.textContent = load_item(key).short;
+                    anchor.href = `edit.html?key=${key}`;
+
+                    list_item.appendChild(anchor);
+                    window.todo_list.appendChild(list_item);
+                })
+            })();
+        </script>
+    </ol>
+</main>
