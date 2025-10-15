@@ -1,0 +1,60 @@
+:root {
+    color-scheme: light dark;
+    --color-primary: rgb(112, 19, 66);
+
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-primary: hotpink;
+    }
+}
+
+body {
+    font-family: sans-serif;
+    line-height: 1.5;
+}
+
+header,
+main,
+form {
+    box-sizing: border-box;
+    width: min(60ch, 100%);
+    margin: auto;
+    border-left: 1px solid var(--color-primary);
+    border-right: 1px solid var(--color-primary);
+    padding: 1ch 2ch;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 1ch;
+}
+
+button a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button.primary {
+    background-color: var(--color-primary);
+}
+
+button.secondary {
+    background-color: transparent;
+}
+
+
+ol {
+    padding-inline-start: 2ch;
+}
+
+
+#todo_list li {
+    cursor: pointer;
+}
+
+#todo_list li:hover {
+    color: var(--color-primary);
+}

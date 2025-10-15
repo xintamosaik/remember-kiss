@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TODO</title>
+
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js"></script>
+</head>
+
+<body>
+    <form id="edit_todo" action="">
+        <h2>Edit Item</h2>
+        <input name="key" type="hidden" id="key">
+        <br>
+        <label for="short">
+            Short Headline
+        </label>
+        <br>
+        <input name="short" type="text" id="short" required>
+        <br>
+        <label for="long">
+            Long Description
+        </label>
+        <br>
+        <input name="long" type="text" id="long">
+        <br>
+        <button class="primary" type="submit">
+            Update Item
+        </button>
+        <button class="secondary">
+            <a href="index.html">Cancel</a>
+        </button>
+    </form>
+    <script>
+        (function open_todo() {
+            const params = new URLSearchParams(window.location.search);
+            const key = params.get("key");
+            if (!key) {
+                console.log("No key provided");
+                return;
+            }
+
+            const item = load_item(key)
+            if (!item) {
+                console.log("We could not find an item")
+                return;
+            }
+
+            const form = window.edit_todo;
+            if (!form) {
+                console.log("There is no form to edit. Did the ID change?");
+                return
+            }
+            form.short.value = item.short
+            form.long.value = item.long ?? ""
+
+            form.key.value = key
+        })();
+
+        function update_todo(event) {
+            event.preventDefault();
+            const data = new FormData(this)
+            const short = data.get("short")
+            const long = data.get("long")
+            const key = data.get("key")
+
+            update_item({ short, long }, key)
+
+            window.history.back();
+
+        }
+        window.edit_todo.addEventListener("submit", update_todo);
+    </script>
+</body>
+
+</html>
