@@ -10,7 +10,6 @@ export class TodoItem extends HTMLElement {
    * Called when element is added to the DOM
    */
   connectedCallback() {
-    // shadow DOM for style encapsulation
     Channels.subscribe("todo-updated", ({ key }) => {
       if (key === this.getAttribute("key")) {
         this.render();
@@ -43,11 +42,10 @@ export class TodoItem extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         :host {
-     
           cursor: pointer;
         }
         :host(:hover) {
-          color: var(--color-primary, hotpink);
+          color: var(--color-primary);
         }
       </style>
       <li>${item.short}</li>

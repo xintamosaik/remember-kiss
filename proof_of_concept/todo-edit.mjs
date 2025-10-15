@@ -20,7 +20,7 @@ export class TodoEdit extends HTMLElement {
         this.shadowRoot.innerHTML = `
       <style>
       </style>
-      <form popover>
+      <form id="edit" popover>
         <input name="key" type="hidden" />
         <label>
           Short Headline
@@ -36,22 +36,13 @@ export class TodoEdit extends HTMLElement {
         </div>
       </form>
     `;
-
         const form = this.shadowRoot.querySelector("form");
-        form.addEventListener("submit", e => this.onSubmit(e));
+
+        const submit = this.shadowRoot.querySelector("button-primary");
+        submit.addEventListener("click", e => this.onSubmit(e));
 
         const cancel = this.shadowRoot.querySelector("#cancel");
         cancel.addEventListener("click", () => this.hidePopover());
-
-        /**
-         *  new CustomEvent("todo-open", {
-          detail: e.detail,
-          bubbles: true,
-          composed: true,
-        })
-
-        we have to listen to that
-         */
 
     }
 
@@ -62,8 +53,7 @@ export class TodoEdit extends HTMLElement {
     open(key) {
         const item = todo.load(key);
         if (!item) return;
-
-        const form = this.shadowRoot.querySelector("form");
+        console.log(this.edit)
         form.key.value = key;
         form.short.value = item.short;
         form.long.value = item.long ?? "";
@@ -75,15 +65,17 @@ export class TodoEdit extends HTMLElement {
      * Handle form submission.
      */
     onSubmit(e) {
+        console.log(this)
         e.preventDefault();
-        const data = new FormData(e.target);
+ 
+        const data = new FormData(form);
         const key = data.get("key");
         const short = data.get("short");
         const long = data.get("long");
         todo.update({ short, long }, key);
-        e.target.reset();
-        e.target.hidePopover();
-        Channels.publish("todo-updated", { key, short, long });
+        form.reset();
+        form.hidePopover();
+        Channels.publish("todo-updated", { key });
     }
 }
 
