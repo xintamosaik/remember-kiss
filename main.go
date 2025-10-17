@@ -57,10 +57,8 @@ func PageAdd(w http.ResponseWriter, r *http.Request) {
 		files:    []string{"frame.html", "add.html"},
 	}
 
-
 	tmpl := template.Must(template.ParseFiles(page.files...))
 	data := struct{ Title string }{Title: page.title}
-
 
 	err := tmpl.ExecuteTemplate(w, "frame", data)
 	if err != nil {
@@ -79,10 +77,8 @@ func PageEdit(w http.ResponseWriter, r *http.Request) {
 		files:    []string{"frame.html", "edit.html"},
 	}
 
-
 	tmpl := template.Must(template.ParseFiles(page.files...))
 	data := struct{ Title string }{Title: page.title}
-
 
 	err := tmpl.ExecuteTemplate(w, "frame", data)
 	if err != nil {
@@ -121,36 +117,6 @@ func PageIndex(w http.ResponseWriter, r *http.Request) {
 	err := tmpl.ExecuteTemplate(w, "frame", data)
 	if err != nil {
 		log.Fatalf("Failed to render %s: %v", page.filename, err)
-	}
-}
-
-func regenerateIndex() {
-	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
-
-	loadFromJSON()
-	// Convert map to slice for template rendering
-	items := make([]TodoItem, 0, len(globalTODOsInMemory))
-	for _, item := range globalTODOsInMemory {
-		items = append(items, item)
-	}
-
-	data := struct {
-		Title string
-		Items []TodoItem
-	}{
-		Title: "TODO",
-		Items: items,
-	}
-
-	f, err := os.Create("public/index.html")
-	if err != nil {
-		log.Fatalf("Failed to create index.html: %v", err)
-	}
-	defer f.Close()
-
-	err = tmpl.ExecuteTemplate(f, "frame", data)
-	if err != nil {
-		log.Fatalf("Failed to execute template: %v", err)
 	}
 }
 
@@ -197,7 +163,7 @@ func addTodo(w http.ResponseWriter, r *http.Request) {
 
 	globalTODOsInMemory[timestamp] = item
 	saveToJSON()
-	regenerateIndex()
+
 	log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
 
 	// Handle form submission logic here
@@ -232,7 +198,7 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 	item.UpdatedAt = time.Now().Format(time.RFC3339)
 	globalTODOsInMemory[key] = item
 	saveToJSON()
-	regenerateIndex()
+
 	log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
 
 	// Handle form submission logic here
@@ -241,6 +207,12 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	log.Println("Loading TODOs from JSON...")
+
+	http.HandleFunc("GET /index.css", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "index.css")
+	})
+	
 	http.HandleFunc("GET /", PageIndex)
 	http.HandleFunc("GET /add.html", PageAdd)
 	http.HandleFunc("GET /edit.html", PageEdit)
@@ -250,6 +222,9 @@ func main() {
 	http.HandleFunc("POST /update", updateTodo)
 
 	log.Println("Serving on http://localhost" + PORT)
+	for _, p := range []string{"/", "/add.html", "/edit.html", "/todo/"} {
+	log.Printf("route registered: %q", p)
+}
 	err := http.ListenAndServe(PORT, nil)
 	if err != nil {
 		log.Fatal(err)
