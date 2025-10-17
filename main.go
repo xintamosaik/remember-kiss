@@ -109,14 +109,12 @@ func PageIndex(w http.ResponseWriter, r *http.Request) {
 
 func Todo(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/todo/"):]
-	log.Printf("Fetching item with ID: %s\n", id)
+
 	item, exists := globalTODOsInMemory[id]
 	if !exists {
 		http.Error(w, "Item not found", http.StatusNotFound)
 		return
 	}
-
-	log.Printf("Found item: %+v\n", item)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(item)
@@ -135,9 +133,7 @@ func addTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	short := r.FormValue("short")
-	log.Println(short)
 
-	// create a linux timestamp for the key
 	timestamp := fmt.Sprintf("%d", time.Now().Unix())
 	item := TodoItem{
 		ID:        timestamp,
@@ -150,9 +146,6 @@ func addTodo(w http.ResponseWriter, r *http.Request) {
 	globalTODOsInMemory[timestamp] = item
 	saveToJSON()
 
-	log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
-
-	// Handle form submission logic here
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -182,12 +175,10 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 	item.Short = short
 	item.Long = long
 	item.UpdatedAt = time.Now().Format(time.RFC3339)
+
 	globalTODOsInMemory[key] = item
 	saveToJSON()
 
-	log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
-
-	// Handle form submission logic here
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
