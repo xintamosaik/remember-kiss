@@ -262,14 +262,17 @@ func main() {
 	})
 
 	http.HandleFunc("GET /", PageIndex)
+	
 	http.HandleFunc("GET /add.html", PageAdd)
+	http.HandleFunc("POST /add", addTodo)
+
 	http.HandleFunc("GET /edit.html", PageEdit)
+	http.HandleFunc("POST /update", updateTodo)
+
 	http.HandleFunc("GET /delete.html", PageDelete)
+	http.HandleFunc("POST /delete", deleteTodo)
 
 	http.HandleFunc("GET /toggle/", toggleTodo)
-	http.HandleFunc("POST /add", addTodo)
-	http.HandleFunc("POST /update", updateTodo)
-	http.HandleFunc("POST /delete", deleteTodo)
 
 	log.Println("Serving on http://localhost" + PORT)
 	err := http.ListenAndServe(PORT, nil)
