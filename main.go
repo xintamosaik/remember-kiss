@@ -84,10 +84,38 @@ func PageEdit(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func PageDelete(w http.ResponseWriter, r *http.Request) {
+	key := r.URL.Query().Get("key")
+
+	item, exists := globalTODOsInMemory[key]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	data := struct {
+		Title string
+		Key   string
+		Short string
+		Long  string
+	}{
+		Title: "Delete Item",
+		Key:   key,
+		Short: item.Short,
+		Long:  item.Long,
+	}
+
+	tmpl := template.Must(template.ParseFiles("frame.html", "delete.html"))
+	err := tmpl.ExecuteTemplate(w, "frame", data)
+	if err != nil {
+		log.Fatalf("Failed to render %s: %v", "frame.html", err)
+	}
+}
+
 func PageIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
 
-	loadFromJSON()
+
 	items := make([]TodoItem, 0, len(globalTODOsInMemory))
 	for _, item := range globalTODOsInMemory {
 		items = append(items, item)
@@ -183,6 +211,7 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+		loadFromJSON()
 	http.HandleFunc("GET /index.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "index.css")
 	})
@@ -190,6 +219,7 @@ func main() {
 	http.HandleFunc("GET /", PageIndex)
 	http.HandleFunc("GET /add.html", PageAdd)
 	http.HandleFunc("GET /edit.html", PageEdit)
+	http.HandleFunc("GET /delete.html", PageDelete)
 
 	// http.HandleFunc("GET /todo/", Todo)
 	http.HandleFunc("POST /add", addTodo)

@@ -1,0 +1,25 @@
+{{ define "content" }}
+<form id="edit_todo" action="/update" method="POST">
+    <h2>Are you sure?</h2>
+    <input name="key" type="hidden" id="key" value="{{ .Key }}">
+    <br>
+    <label for="short">
+        Short Headline
+    </label>
+    <br>
+    <input name="short" type="text" id="short" value="{{ .Short }}" required readonly>
+    <br>
+    <label for="long">
+        Long Description
+    </label>
+    <br>
+    <input name="long" type="text" id="long" value="{{ .Long }}" readonly>
+    <br>
+    <button class="primary" type="submit">
+        Yes, delete!
+    </button>
+    <button class="secondary">
+        <a href="index.html">Cancel</a>
+    </button>
+</form>
+{{ end }}

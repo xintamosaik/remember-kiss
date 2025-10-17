@@ -32,9 +32,9 @@ button {
     border-radius: 1ch;
 }
 
-button a {
+a {
     text-decoration: none;
-    color: inherit;
+    color: inherit
 }
 
 button.primary {
@@ -45,11 +45,19 @@ button.secondary {
     background-color: transparent;
 }
 
+input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1rem;
+    padding: 0.5ch;
+    margin-bottom: 1ch;
+    border: 1px solid var(--color-primary);
+    border-radius: 0.5ch;
+}
 
 ol {
     padding-inline-start: 2ch;
 }
-
 
 #todo_list li {
     cursor: pointer;
