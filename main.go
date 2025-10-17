@@ -115,7 +115,6 @@ func PageDelete(w http.ResponseWriter, r *http.Request) {
 func PageIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
 
-
 	items := make([]TodoItem, 0, len(globalTODOsInMemory))
 	for _, item := range globalTODOsInMemory {
 		items = append(items, item)
