@@ -67,22 +67,28 @@ func PageAdd(w http.ResponseWriter, r *http.Request) {
 }
 
 func PageEdit(w http.ResponseWriter, r *http.Request) {
-	page := struct {
-		filename string
-		title    string
-		files    []string
-	}{
-		filename: "edit.html",
-		title:    "Edit Item",
-		files:    []string{"frame.html", "edit.html"},
+	key := r.URL.Query().Get("key")
+
+	item, exists := globalTODOsInMemory[key]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
 	}
 
-	tmpl := template.Must(template.ParseFiles(page.files...))
-	data := struct{ Title string }{Title: page.title}
+	data := struct {
+		Title string
+		Short string
+		Long  string
+	}{
+		Title: "Edit Item",
+		Short: item.Short,
+		Long:  item.Long,
+	}
 
+	tmpl := template.Must(template.ParseFiles("frame.html", "edit.html"))
 	err := tmpl.ExecuteTemplate(w, "frame", data)
 	if err != nil {
-		log.Fatalf("Failed to render %s: %v", page.filename, err)
+		log.Fatalf("Failed to render %s: %v", "frame.html", err)
 	}
 }
 
@@ -119,7 +125,6 @@ func PageIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Failed to render %s: %v", page.filename, err)
 	}
 }
-
 
 func Todo(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/todo/"):]
@@ -206,25 +211,19 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
-	log.Println("Loading TODOs from JSON...")
-
 	http.HandleFunc("GET /index.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "index.css")
 	})
-	
+
 	http.HandleFunc("GET /", PageIndex)
 	http.HandleFunc("GET /add.html", PageAdd)
 	http.HandleFunc("GET /edit.html", PageEdit)
 
-	http.HandleFunc("GET /todo/", Todo)
+	// http.HandleFunc("GET /todo/", Todo)
 	http.HandleFunc("POST /add", addTodo)
 	http.HandleFunc("POST /update", updateTodo)
 
 	log.Println("Serving on http://localhost" + PORT)
-	for _, p := range []string{"/", "/add.html", "/edit.html", "/todo/"} {
-	log.Printf("route registered: %q", p)
-}
 	err := http.ListenAndServe(PORT, nil)
 	if err != nil {
 		log.Fatal(err)
