@@ -194,15 +194,11 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
-	// API:GET:/todo/{id} - for fetching a single item with fetch API
 	http.HandleFunc("GET /todo/", Todo)
-
-	// API:POST:/add
 	http.HandleFunc("POST /add", addTodo)
-	// API:POST:/update
-	http.HandleFunc("/update", updateTodo)
-	log.Println("Serving on http://localhost" + PORT)
+	http.HandleFunc("POST /update", updateTodo)
 
+	log.Println("Serving on http://localhost" + PORT)
 	err := http.ListenAndServe(PORT, nil)
 	if err != nil {
 		log.Fatal(err)
