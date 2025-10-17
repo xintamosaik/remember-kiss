@@ -102,6 +102,91 @@ func regenerateHTML() {
 		}
 	}
 }
+
+func Todo(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Path[len("/todo/"):]
+	log.Printf("Fetching item with ID: %s\n", id)
+	item, exists := globalTODOsInMemory[id]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	log.Printf("Found item: %+v\n", item)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(item)
+}
+
+func addTodo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	short := r.FormValue("short")
+	log.Println(short)
+
+	// create a linux timestamp for the key
+	timestamp := fmt.Sprintf("%d", time.Now().Unix())
+	item := TodoItem{
+		ID:        timestamp,
+		Short:     short,
+		Long:      "",
+		CreatedAt: time.Now().Format(time.RFC3339),
+		UpdatedAt: time.Now().Format(time.RFC3339),
+	}
+
+	globalTODOsInMemory[timestamp] = item
+	saveToJSON()
+	regenerateIndex()
+	log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
+
+	// Handle form submission logic here
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func updateTodo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	key := r.FormValue("key")
+	short := r.FormValue("short")
+	long := r.FormValue("long")
+	log.Printf("Updating item %s: %s / %s\n", key, short, long)
+
+	item, exists := globalTODOsInMemory[key]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	item.Short = short
+	item.Long = long
+	item.UpdatedAt = time.Now().Format(time.RFC3339)
+	globalTODOsInMemory[key] = item
+	saveToJSON()
+	regenerateIndex()
+	log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
+
+	// Handle form submission logic here
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func main() {
 	// Load existing TODOs from JSON file
 	regenerateHTML() // will be in a different process later but for development it's ok here
@@ -110,90 +195,12 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
 	// API:GET:/todo/{id} - for fetching a single item with fetch API
-	http.HandleFunc("/todo/", func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Path[len("/todo/"):]
-		log.Printf("Fetching item with ID: %s\n", id)
-		item, exists := globalTODOsInMemory[id]
-		if !exists {
-			http.Error(w, "Item not found", http.StatusNotFound)
-			return
-		}
-
-		log.Printf("Found item: %+v\n", item)
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(item)
-	})
+	http.HandleFunc("GET /todo/", Todo)
 
 	// API:POST:/add
-	http.HandleFunc("/add", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "Failed to parse form", http.StatusBadRequest)
-			return
-		}
-
-		short := r.FormValue("short")
-		log.Println(short)
-
-		// create a linux timestamp for the key
-		timestamp := fmt.Sprintf("%d", time.Now().Unix())
-		item := TodoItem{
-			ID:        timestamp,
-			Short:     short,
-			Long:      "",
-			CreatedAt: time.Now().Format(time.RFC3339),
-			UpdatedAt: time.Now().Format(time.RFC3339),
-		}
-
-		globalTODOsInMemory[timestamp] = item
-		saveToJSON()
-		regenerateIndex()
-		log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
-
-		// Handle form submission logic here
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	})
+	http.HandleFunc("POST /add", addTodo)
 	// API:POST:/update
-	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "Failed to parse form", http.StatusBadRequest)
-			return
-		}
-
-		key := r.FormValue("key")
-		short := r.FormValue("short")
-		long := r.FormValue("long")
-		log.Printf("Updating item %s: %s / %s\n", key, short, long)
-
-		item, exists := globalTODOsInMemory[key]
-		if !exists {
-			http.Error(w, "Item not found", http.StatusNotFound)
-			return
-		}
-
-		item.Short = short
-		item.Long = long
-		item.UpdatedAt = time.Now().Format(time.RFC3339)
-		globalTODOsInMemory[key] = item
-		saveToJSON()
-		regenerateIndex()
-		log.Printf("Current TODOs: %+v\n", globalTODOsInMemory)
-
-		// Handle form submission logic here
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	})
+	http.HandleFunc("/update", updateTodo)
 	log.Println("Serving on http://localhost" + PORT)
 
 	err := http.ListenAndServe(PORT, nil)
