@@ -46,6 +46,84 @@ func loadFromJSON() {
 	json.Unmarshal(data, &globalTODOsInMemory)
 }
 
+func PageAdd(w http.ResponseWriter, r *http.Request) {
+	page := struct {
+		filename string
+		title    string
+		files    []string
+	}{
+		filename: "add.html",
+		title:    "Add Item",
+		files:    []string{"frame.html", "add.html"},
+	}
+
+
+	tmpl := template.Must(template.ParseFiles(page.files...))
+	data := struct{ Title string }{Title: page.title}
+
+
+	err := tmpl.ExecuteTemplate(w, "frame", data)
+	if err != nil {
+		log.Fatalf("Failed to render %s: %v", page.filename, err)
+	}
+}
+
+func PageEdit(w http.ResponseWriter, r *http.Request) {
+	page := struct {
+		filename string
+		title    string
+		files    []string
+	}{
+		filename: "edit.html",
+		title:    "Edit Item",
+		files:    []string{"frame.html", "edit.html"},
+	}
+
+
+	tmpl := template.Must(template.ParseFiles(page.files...))
+	data := struct{ Title string }{Title: page.title}
+
+
+	err := tmpl.ExecuteTemplate(w, "frame", data)
+	if err != nil {
+		log.Fatalf("Failed to render %s: %v", page.filename, err)
+	}
+}
+
+func PageIndex(w http.ResponseWriter, r *http.Request) {
+	page := struct {
+		filename string
+		title    string
+		files    []string
+	}{
+		filename: "index.html",
+		title:    "TODO",
+		files:    []string{"frame.html", "main.html"},
+	}
+
+	tmpl := template.Must(template.ParseFiles(page.files...))
+
+	loadFromJSON()
+	// Convert map to slice for template rendering
+	items := make([]TodoItem, 0, len(globalTODOsInMemory))
+	for _, item := range globalTODOsInMemory {
+		items = append(items, item)
+	}
+
+	data := struct {
+		Title string
+		Items []TodoItem
+	}{
+		Title: page.title,
+		Items: items,
+	}
+
+	err := tmpl.ExecuteTemplate(w, "frame", data)
+	if err != nil {
+		log.Fatalf("Failed to render %s: %v", page.filename, err)
+	}
+}
+
 func regenerateIndex() {
 	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
 
@@ -76,32 +154,6 @@ func regenerateIndex() {
 	}
 }
 
-func regenerateHTML() {
-	pages := []struct {
-		filename string
-		title    string
-		files    []string
-	}{
-		{"public/add.html", "Add Item", []string{"frame.html", "add.html"}},
-		{"public/edit.html", "Edit Item", []string{"frame.html", "edit.html"}},
-	}
-
-	for _, page := range pages {
-		tmpl := template.Must(template.ParseFiles(page.files...))
-		data := struct{ Title string }{Title: page.title}
-
-		f, err := os.Create(page.filename)
-		if err != nil {
-			log.Fatalf("Failed to create %s: %v", page.filename, err)
-		}
-		defer f.Close()
-
-		err = tmpl.ExecuteTemplate(f, "frame", data)
-		if err != nil {
-			log.Fatalf("Failed to render %s: %v", page.filename, err)
-		}
-	}
-}
 
 func Todo(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/todo/"):]
@@ -188,11 +240,10 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Load existing TODOs from JSON file
-	regenerateHTML() // will be in a different process later but for development it's ok here
-	regenerateIndex()
 
-	http.Handle("/", http.FileServer(http.Dir("public")))
+	http.HandleFunc("GET /", PageIndex)
+	http.HandleFunc("GET /add.html", PageAdd)
+	http.HandleFunc("GET /edit.html", PageEdit)
 
 	http.HandleFunc("GET /todo/", Todo)
 	http.HandleFunc("POST /add", addTodo)
