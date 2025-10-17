@@ -77,10 +77,12 @@ func PageEdit(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		Title string
+		Key   string
 		Short string
 		Long  string
 	}{
 		Title: "Edit Item",
+		Key:  key,
 		Short: item.Short,
 		Long:  item.Long,
 	}

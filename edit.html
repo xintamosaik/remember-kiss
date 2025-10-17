@@ -1,7 +1,7 @@
 {{ define "content" }}
 <form id="edit_todo" action="/update" method="POST">
     <h2>Edit Item</h2>
-    <input name="key" type="hidden" id="key">
+    <input name="key" type="hidden" id="key" value="{{ .Key }}">
     <br>
     <label for="short">
         Short Headline
