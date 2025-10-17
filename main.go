@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"time"
-	"encoding/json"
 )
 
 type TodoItem struct {
@@ -25,20 +25,25 @@ type TodoList struct {
 const PORT = ":3000"
 
 var globalTODOsInMemory = make(map[string]TodoItem)
-func saveToJSON() error {
-    f, err := os.Create("data.json")
-    if err != nil { return err }
-    defer f.Close()
 
-    enc := json.NewEncoder(f)
-    enc.SetIndent("", "  ")
-    return enc.Encode(globalTODOsInMemory)
+func saveToJSON() error {
+	f, err := os.Create("data.json")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	return enc.Encode(globalTODOsInMemory)
 }
 
 func loadFromJSON() {
-    data, err := os.ReadFile("data.json")
-    if err != nil { return } // file might not exist yet
-    json.Unmarshal(data, &globalTODOsInMemory)
+	data, err := os.ReadFile("data.json")
+	if err != nil {
+		return
+	} // file might not exist yet
+	json.Unmarshal(data, &globalTODOsInMemory)
 }
 
 func regenerateIndex() {
@@ -104,7 +109,6 @@ func main() {
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 
-
 	// API:GET:/todo/{id} - for fetching a single item with fetch API
 	http.HandleFunc("/todo/", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Path[len("/todo/"):]
@@ -118,7 +122,7 @@ func main() {
 		log.Printf("Found item: %+v\n", item)
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(item)	
+		json.NewEncoder(w).Encode(item)
 	})
 
 	// API:POST:/add
