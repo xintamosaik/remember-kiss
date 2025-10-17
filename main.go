@@ -210,8 +210,34 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func deleteTodo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	key := r.FormValue("key")
+	log.Printf("Deleting item %s\n", key)
+
+	_, exists := globalTODOsInMemory[key]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	delete(globalTODOsInMemory, key)
+	saveToJSON()
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func main() {
-		loadFromJSON()
+	loadFromJSON()
 	http.HandleFunc("GET /index.css", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "index.css")
 	})
@@ -224,6 +250,7 @@ func main() {
 	// http.HandleFunc("GET /todo/", Todo)
 	http.HandleFunc("POST /add", addTodo)
 	http.HandleFunc("POST /update", updateTodo)
+	http.HandleFunc("POST /delete", deleteTodo)
 
 	log.Println("Serving on http://localhost" + PORT)
 	err := http.ListenAndServe(PORT, nil)
