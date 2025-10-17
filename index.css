@@ -57,6 +57,15 @@ ol {
     cursor: pointer;
 }
 
+#todo_list li a.done {
+    text-decoration: line-through;
+    color: gray;
+}
+
+#todo_list li a.todo {
+    font-weight: bold;
+}
+
 #todo_list li:hover {
     color: var(--color-primary);
 }

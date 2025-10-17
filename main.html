@@ -10,7 +10,10 @@
     <ol id="todo_list">
         {{ range .Items }}
         <li>
-            <a href="edit.html?key={{ .ID }}">{{ .Short }}</a>
+            <a href="/toggle/?key={{ .ID }}" title="Toggle"> 
+                {{ if .Done }}✅{{ else }}⬜{{ end }}
+            </a>
+            <a class="{{ if .Done }}done{{ else }}todo{{ end }}" href="edit.html?key={{ .ID }}">{{ .Short }}</a>
             <a href="delete.html?key={{ .ID }}" title="Delete">🗑️</a>
         </li>
         {{ else }}

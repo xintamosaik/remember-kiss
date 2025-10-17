@@ -14,6 +14,7 @@ type TodoItem struct {
 	ID        string `json:"ID"`
 	Short     string `json:"Short"`
 	Long      string `json:"Long"`
+	Done      bool   `json:"Done"`
 	CreatedAt string `json:"CreatedAt"`
 	UpdatedAt string `json:"UpdatedAt"`
 }
@@ -235,6 +236,25 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func toggleTodo(w http.ResponseWriter, r *http.Request) {
+	key := r.URL.Query().Get("key")
+	
+	log.Printf("Toggling item %s\n", key)
+	item, exists := globalTODOsInMemory[key]
+	if !exists {
+		http.Error(w, "Item not found", http.StatusNotFound)
+		return
+	}
+
+	item.Done = !item.Done
+	item.UpdatedAt = time.Now().Format(time.RFC3339)
+
+	globalTODOsInMemory[key] = item
+	saveToJSON()
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func main() {
 	loadFromJSON()
 	http.HandleFunc("GET /index.css", func(w http.ResponseWriter, r *http.Request) {
@@ -246,7 +266,7 @@ func main() {
 	http.HandleFunc("GET /edit.html", PageEdit)
 	http.HandleFunc("GET /delete.html", PageDelete)
 
-	// http.HandleFunc("GET /todo/", Todo)
+	http.HandleFunc("GET /toggle/", toggleTodo)
 	http.HandleFunc("POST /add", addTodo)
 	http.HandleFunc("POST /update", updateTodo)
 	http.HandleFunc("POST /delete", deleteTodo)
