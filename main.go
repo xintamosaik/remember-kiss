@@ -42,27 +42,17 @@ func loadFromJSON() {
 	data, err := os.ReadFile("data.json")
 	if err != nil {
 		return
-	} // file might not exist yet
+	}
 	json.Unmarshal(data, &globalTODOsInMemory)
 }
 
 func PageAdd(w http.ResponseWriter, r *http.Request) {
-	page := struct {
-		filename string
-		title    string
-		files    []string
-	}{
-		filename: "add.html",
-		title:    "Add Item",
-		files:    []string{"frame.html", "add.html"},
-	}
-
-	tmpl := template.Must(template.ParseFiles(page.files...))
-	data := struct{ Title string }{Title: page.title}
+	tmpl := template.Must(template.ParseFiles("frame.html", "add.html"))
+	data := struct{ Title string }{Title: "Add Item"}
 
 	err := tmpl.ExecuteTemplate(w, "frame", data)
 	if err != nil {
-		log.Fatalf("Failed to render %s: %v", page.filename, err)
+		log.Fatalf("Failed to render %s: %v", "add.html", err)
 	}
 }
 
@@ -82,7 +72,7 @@ func PageEdit(w http.ResponseWriter, r *http.Request) {
 		Long  string
 	}{
 		Title: "Edit Item",
-		Key:  key,
+		Key:   key,
 		Short: item.Short,
 		Long:  item.Long,
 	}
@@ -95,20 +85,9 @@ func PageEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func PageIndex(w http.ResponseWriter, r *http.Request) {
-	page := struct {
-		filename string
-		title    string
-		files    []string
-	}{
-		filename: "index.html",
-		title:    "TODO",
-		files:    []string{"frame.html", "main.html"},
-	}
-
-	tmpl := template.Must(template.ParseFiles(page.files...))
+	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
 
 	loadFromJSON()
-	// Convert map to slice for template rendering
 	items := make([]TodoItem, 0, len(globalTODOsInMemory))
 	for _, item := range globalTODOsInMemory {
 		items = append(items, item)
@@ -118,13 +97,13 @@ func PageIndex(w http.ResponseWriter, r *http.Request) {
 		Title string
 		Items []TodoItem
 	}{
-		Title: page.title,
+		Title: "TODO",
 		Items: items,
 	}
 
 	err := tmpl.ExecuteTemplate(w, "frame", data)
 	if err != nil {
-		log.Fatalf("Failed to render %s: %v", page.filename, err)
+		log.Fatalf("Failed to render %s: %v", "index.html", err)
 	}
 }
 
