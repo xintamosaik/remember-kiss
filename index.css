@@ -1,13 +1,7 @@
 :root {
     color-scheme: light dark;
-    --color-primary: rgb(112, 19, 66);
+     --color-primary: hotpink;
 
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --color-primary: hotpink;
-    }
 }
 
 body {
