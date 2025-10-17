@@ -7,13 +7,13 @@
         Short Headline
     </label>
     <br>
-    <input name="short" type="text" id="short" required>
+    <input name="short" type="text" id="short" value="{{ .Short }}" required>
     <br>
     <label for="long">
         Long Description
     </label>
     <br>
-    <input name="long" type="text" id="long">
+    <input name="long" type="text" id="long" value="{{ .Long }}">
     <br>
     <button class="primary" type="submit">
         Update Item
@@ -22,38 +22,4 @@
         <a href="index.html">Cancel</a>
     </button>
 </form>
-<script>
-    (async function open_todo() {
-        const params = new URLSearchParams(window.location.search);
-        const key = params.get("key");
-        if (!key) {
-            console.log("No key provided");
-            return;
-        }
-
-        const json = await fetch(`/todo/${key}`)
-        if (!json) {
-            console.log("We could not find an item")
-            return;
-        }
-
-        item = await json.json()
-        console.log(item)
-        
-
-        const form = window.edit_todo;
-        if (!form) {
-            console.log("There is no form to edit. Did the ID change?");
-            return
-        }
-        form.short.value = item.Short
-        form.long.value = item.Long ?? ""
-
-        form.key.value = key
-    })();
-
-
-
-</script>
-
 {{ end }}
