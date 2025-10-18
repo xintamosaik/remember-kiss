@@ -4,16 +4,19 @@
     <form id="filter_form" method="get" action="search.html">
         <input type="text" id="filter_input" name="filter" value="{{ .Filter }}" >
         <button class="primary" type="submit">Apply</button>
+        <a href="/index.html">
+            <button type="button">Back</button>
+        </a>
     </form>
 </header>
 <main>
     <ol id="todo_list">
         {{ range .Items }}
-        <li>
+        <li class="{{ if .Done }}done{{ else }}todo{{ end }}">
             <a href="/toggle/?key={{ .ID }}" title="Toggle">
                 {{ if .Done }}✅{{ else }}⬜{{ end }}
             </a>
-            <a class="{{ if .Done }}done{{ else }}todo{{ end }}" href="edit.html?key={{ .ID }}">
+            <a href="edit.html?key={{ .ID }}">
                 {{ .Short }}
             </a>
             <a href="delete.html?key={{ .ID }}" title="Delete">

@@ -11,11 +11,11 @@
 <main>
     <ol id="todo_list">
         {{ range .Items }}
-        <li>
+        <li class="{{ if .Done }}done{{ else }}todo{{ end }}">
             <a href="/toggle/?key={{ .ID }}" title="Toggle">
                 {{ if .Done }}✅{{ else }}⬜{{ end }}
             </a>
-            <a class="{{ if .Done }}done{{ else }}todo{{ end }}" href="edit.html?key={{ .ID }}">
+            <a href="edit.html?key={{ .ID }}">
                 {{ .Short }}
             </a>
             <a href="delete.html?key={{ .ID }}" title="Delete">
@@ -27,13 +27,14 @@
             No todos yet.
         </li>
         {{ end }}
-        <li>
+        <li class="todo">
             <a href="add.html">
                 <span>
                     ➕
                 </span>
-                <span>Add Item</span>
-
+                <span>
+                    Add Item
+                </span>
             </a>
         </li>
     </ol>

@@ -51,7 +51,8 @@ ol {
     padding-inline-start: 2ch;
 }
 
-#todo_list li {
+#todo_list li.done,
+#todo_list li.todo {
     cursor: pointer;
 }
 
@@ -60,10 +61,11 @@ ol {
     color: gray;
 }
 
-#todo_list li a.todo {
+#todo_list li.todo a {
     font-weight: bold;
 }
 
-#todo_list li:hover {
+#todo_list li.todo:hover,
+#todo_list li.done:hover {
     color: var(--color-primary);
 }
