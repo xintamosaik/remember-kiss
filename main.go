@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"sort"
 )
 
 type TodoItem struct {
@@ -120,6 +121,11 @@ func PageIndex(w http.ResponseWriter, r *http.Request) {
 	for _, item := range globalTODOsInMemory {
 		items = append(items, item)
 	}
+
+	// Sort items by CreatedAt timestamp (optional)
+	sort.Slice(items, func(i, j int) bool {
+	 	return items[i].CreatedAt < items[j].CreatedAt
+	})
 
 	data := struct {
 		Title string
