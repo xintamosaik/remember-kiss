@@ -49,6 +49,13 @@ input[type="text"] {
 
 ol {
     padding-inline-start: 2ch;
+    line-height: 2.5;
+}
+
+ol li {
+        display: grid;
+    gap: 1ch;
+    grid-template-columns: 1fr 20px 20px;
 }
 
 #todo_list li.done,

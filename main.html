@@ -12,11 +12,11 @@
     <ol id="todo_list">
         {{ range .Items }}
         <li class="{{ if .Done }}done{{ else }}todo{{ end }}">
-            <a href="/toggle/?key={{ .ID }}" title="Toggle">
-                {{ if .Done }}✅{{ else }}⬜{{ end }}
-            </a>
             <a href="edit.html?key={{ .ID }}">
                 {{ .Short }}
+            </a>
+            <a href="/toggle/?key={{ .ID }}" title="Toggle">
+                {{ if .Done }}✅{{ else }}⬜{{ end }}
             </a>
             <a href="delete.html?key={{ .ID }}" title="Delete">
                 🗑️
