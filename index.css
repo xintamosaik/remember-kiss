@@ -9,9 +9,9 @@ body {
     line-height: 1.5;
 }
 
-header,
-main,
-form {
+body > header,
+body > main,
+body > form {
     box-sizing: border-box;
     width: min(60ch, 100%);
     margin: auto;

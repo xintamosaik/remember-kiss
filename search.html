@@ -1,12 +1,10 @@
 {{ define "content" }}
 <header>
-    <h1>TODO</h1>
-    <label for="filter_input">Filter:</label>
+    <h1>Search</h1>
     <form id="filter_form" method="get" action="search.html">
-        <input type="text" id="filter_input" name="filter" required>
-        <button type="submit">Apply</button>
+        <input type="text" id="filter_input" name="filter" value="{{ .Filter }}" >
+        <button class="primary" type="submit">Apply</button>
     </form>
-
 </header>
 <main>
     <ol id="todo_list">
@@ -24,18 +22,9 @@
         </li>
         {{ else }}
         <li>
-            No todos yet.
+            No todos found.
         </li>
         {{ end }}
-        <li>
-            <a href="add.html">
-                <span>
-                    ➕
-                </span>
-                <span>Add Item</span>
-
-            </a>
-        </li>
     </ol>
 </main>
 {{ end }}
