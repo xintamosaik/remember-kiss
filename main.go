@@ -116,41 +116,8 @@ func PageDelete(w http.ResponseWriter, r *http.Request) {
 }
 
 func PageIndex(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
-
-	items := make([]TodoItem, 0, len(globalTODOsInMemory))
-	for _, item := range globalTODOsInMemory {
-		items = append(items, item)
-	}
-
-	// Sort items by CreatedAt timestamp (optional)
-	sort.Slice(items, func(i, j int) bool {
-	 	return items[i].CreatedAt < items[j].CreatedAt
-	})
-
-	data := struct {
-		Title string
-		Items []TodoItem
-	}{
-		Title: "TODO",
-		Items: items,
-	}
-
-	err := tmpl.ExecuteTemplate(w, "frame", data)
-	if err != nil {
-		log.Fatalf("Failed to render %s: %v", "index.html", err)
-	}
-}
-func containsIgnoreCase(s, substr string) bool {
-	sLower := strings.ToLower(s)
-	substrLower := strings.ToLower(substr)
-	return strings.Contains(sLower, substrLower)
-}
-
-func PageSearch(w http.ResponseWriter, r *http.Request) {
 	filter := r.URL.Query().Get("filter")
-
-	tmpl := template.Must(template.ParseFiles("frame.html", "search.html"))
+	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
 
 	items := make([]TodoItem, 0, len(globalTODOsInMemory))
 	for _, item := range globalTODOsInMemory {
@@ -168,15 +135,21 @@ func PageSearch(w http.ResponseWriter, r *http.Request) {
 		Items []TodoItem
 		Filter string
 	}{
-		Title: "TODO - Search Results",
+		Title: "TODO",
 		Items: items,
 		Filter: filter,
 	}
 
 	err := tmpl.ExecuteTemplate(w, "frame", data)
 	if err != nil {
-		log.Fatalf("Failed to render %s: %v", "search.html", err)
+		log.Fatalf("Failed to render %s: %v", "index.html", err)
 	}
+}
+
+func containsIgnoreCase(s, substr string) bool {
+	sLower := strings.ToLower(s)
+	substrLower := strings.ToLower(substr)
+	return strings.Contains(sLower, substrLower)
 }
 
 func Todo(w http.ResponseWriter, r *http.Request) {
@@ -312,8 +285,6 @@ func main() {
 
 	http.HandleFunc("GET /delete.html", PageDelete)
 	http.HandleFunc("POST /delete", deleteTodo)
-
-	http.HandleFunc("GET /search.html/", PageSearch)
 
 	http.HandleFunc("GET /toggle/", toggleTodo)
 
