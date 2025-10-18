@@ -25,7 +25,7 @@ type TodoList struct {
 	Items []TodoItem `json:"Items"`
 }
 
-const PORT = ":3000"
+const port = ":3000"
 
 var globalTODOsInMemory = make(map[string]TodoItem)
 
@@ -49,7 +49,7 @@ func loadFromJSON() {
 	json.Unmarshal(data, &globalTODOsInMemory)
 }
 
-func PageAdd(w http.ResponseWriter, r *http.Request) {
+func pageAdd(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("frame.html", "add.html"))
 	data := struct{ Title string }{Title: "Add Item"}
 
@@ -59,7 +59,7 @@ func PageAdd(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PageEdit(w http.ResponseWriter, r *http.Request) {
+func pageEdit(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Query().Get("key")
 
 	item, exists := globalTODOsInMemory[key]
@@ -87,7 +87,7 @@ func PageEdit(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PageDelete(w http.ResponseWriter, r *http.Request) {
+func pageDelete(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Query().Get("key")
 
 	item, exists := globalTODOsInMemory[key]
@@ -115,7 +115,7 @@ func PageDelete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PageIndex(w http.ResponseWriter, r *http.Request) {
+func pageIndex(w http.ResponseWriter, r *http.Request) {
 	filter := r.URL.Query().Get("filter")
 	tmpl := template.Must(template.ParseFiles("frame.html", "main.html"))
 
@@ -150,19 +150,6 @@ func containsIgnoreCase(s, substr string) bool {
 	sLower := strings.ToLower(s)
 	substrLower := strings.ToLower(substr)
 	return strings.Contains(sLower, substrLower)
-}
-
-func Todo(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Path[len("/todo/"):]
-
-	item, exists := globalTODOsInMemory[id]
-	if !exists {
-		http.Error(w, "Item not found", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(item)
 }
 
 func addTodo(w http.ResponseWriter, r *http.Request) {
@@ -275,21 +262,21 @@ func main() {
 		http.ServeFile(w, r, "index.css")
 	})
 
-	http.HandleFunc("GET /", PageIndex)
+	http.HandleFunc("GET /", pageIndex)
 	
-	http.HandleFunc("GET /add.html", PageAdd)
+	http.HandleFunc("GET /add.html", pageAdd)
 	http.HandleFunc("POST /add", addTodo)
 
-	http.HandleFunc("GET /edit.html", PageEdit)
+	http.HandleFunc("GET /edit.html", pageEdit)
 	http.HandleFunc("POST /update", updateTodo)
 
-	http.HandleFunc("GET /delete.html", PageDelete)
+	http.HandleFunc("GET /delete.html", pageDelete)
 	http.HandleFunc("POST /delete", deleteTodo)
 
 	http.HandleFunc("GET /toggle/", toggleTodo)
 
-	log.Println("Serving on http://localhost" + PORT)
-	err := http.ListenAndServe(PORT, nil)
+	log.Println("Serving on http://localhost" + port)
+	err := http.ListenAndServe(port, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
