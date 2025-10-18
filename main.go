@@ -198,7 +198,6 @@ func updateTodo(w http.ResponseWriter, r *http.Request) {
 	key := r.FormValue("key")
 	short := r.FormValue("short")
 	long := r.FormValue("long")
-	log.Printf("Updating item %s: %s / %s\n", key, short, long)
 
 	item, exists := globalTODOsInMemory[key]
 	if !exists {
@@ -229,7 +228,6 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	key := r.FormValue("key")
-	log.Printf("Deleting item %s\n", key)
 
 	_, exists := globalTODOsInMemory[key]
 	if !exists {
@@ -245,7 +243,6 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 func toggleTodo(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Query().Get("key")
 	
-	log.Printf("Toggling item %s\n", key)
 	item, exists := globalTODOsInMemory[key]
 	if !exists {
 		http.Error(w, "Item not found", http.StatusNotFound)
