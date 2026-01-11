@@ -7,9 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 	"sort"
 	"strings"
+	"time"
 )
 
 type TodoItem struct {
@@ -17,6 +17,9 @@ type TodoItem struct {
 	Short     string `json:"Short"`
 	Long      string `json:"Long"`
 	Done      bool   `json:"Done"`
+	State     int    `json:"State"`
+	Value     int    `json:"Value"`
+	Effort 	  int      
 	CreatedAt string `json:"CreatedAt"`
 	UpdatedAt string `json:"UpdatedAt"`
 }
@@ -127,16 +130,16 @@ func pageIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sort.Slice(items, func(i, j int) bool {
-	 	return items[i].CreatedAt < items[j].CreatedAt
+		return items[i].CreatedAt < items[j].CreatedAt
 	})
 
 	data := struct {
-		Title string
-		Items []TodoItem
+		Title  string
+		Items  []TodoItem
 		Filter string
 	}{
-		Title: "TODO",
-		Items: items,
+		Title:  "TODO",
+		Items:  items,
 		Filter: filter,
 	}
 
@@ -240,7 +243,7 @@ func deleteTodo(w http.ResponseWriter, r *http.Request) {
 
 func toggleTodo(w http.ResponseWriter, r *http.Request) {
 	key := r.URL.Query().Get("key")
-	
+
 	item, exists := globalTODOsInMemory[key]
 	if !exists {
 		http.Error(w, "Item not found", http.StatusNotFound)
@@ -263,7 +266,7 @@ func main() {
 	})
 
 	http.HandleFunc("GET /", pageIndex)
-	
+
 	http.HandleFunc("GET /add.html", pageAdd)
 	http.HandleFunc("POST /add", addTodo)
 
